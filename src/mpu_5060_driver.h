@@ -52,7 +52,7 @@ int8_t i2c_reg_write(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *reg_data, uint
     checkErr("I2C: write register address", i2c_master_write_byte(cmd, reg_addr, true));
     checkErr("I2C: write data", i2c_master_write(cmd, reg_data, length, true));
     checkErr("I2C: stop", i2c_master_stop(cmd));
-    ret = i2c_master_cmd_begin(CONFIG_I2C_MASTER_PORT_NUM, cmd, 100 / portTICK_RATE_MS);
+    ret = i2c_master_cmd_begin(CONFIG_I2C_MASTER_PORT_NUM, cmd, 100 / portTICK_PERIOD_MS);
     checkErr("I2C: begin", ret);
     i2c_cmd_link_delete(cmd);
 
@@ -97,7 +97,7 @@ int8_t i2c_reg_read(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *reg_data, uint1
     checkErr("I2C: stop",
              i2c_master_stop(cmd));
 
-    ret = i2c_master_cmd_begin(CONFIG_I2C_MASTER_PORT_NUM, cmd, 100 / portTICK_RATE_MS);
+    ret = i2c_master_cmd_begin(CONFIG_I2C_MASTER_PORT_NUM, cmd, 100 / portTICK_PERIOD_MS);
     checkErr("I2C: begin", ret);
     i2c_cmd_link_delete(cmd);
 
@@ -112,10 +112,12 @@ void initialize() {
 
     delay_ms(100);
 
+    uint8_t pwrMode = 0x00;
+    uint8_t usCtrl = 0x01;
     //Датчик тактируется от встроенного 8Мгц осциллятора
-    i2c_reg_write(MPU_5060_ADDR, 0x6B, (uint8_t) 0x00, 1);  // Register_PWR_M1 = 0, Disable sleep mode
+    i2c_reg_write(MPU_5060_ADDR, 0x6B, &pwrMode, 1);  // Register_PWR_M1 = 0, Disable sleep mode
     //Выполнить очистку встроенных регистров датчика
-    i2c_reg_write(MPU_5060_ADDR, 0x6A, (uint8_t) 0x01, 1);  // Register_UsCtrl = 1
+    i2c_reg_write(MPU_5060_ADDR, 0x6A, &usCtrl, 1);  // Register_UsCtrl = 1
 
     delay_ms(100);
     
